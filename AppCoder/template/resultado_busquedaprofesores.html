@@ -1,0 +1,33 @@
+{% extends "padre.html" %}
+{% load static %}
+
+{% block contenido %}  
+  
+{% if profesores %}
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>ID Comisión</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profesor in profesores %}
+            <tr>
+                <td>{{ profesor.nombre }}</td>
+                <td>{{ profesor.apellido }}</td>
+                <td>{{ profesor.id_comision }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-danger" role="alert">
+    No se encontraron profesores con ese nombre, por favor, volvé atrás e intentá nuevamente
+</div>
+    {% endif %}
+
+{% endblock %}

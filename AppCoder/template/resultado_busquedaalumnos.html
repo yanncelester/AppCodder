@@ -1,0 +1,32 @@
+{% extends "padre.html" %}
+{% load static %}
+
+{% block contenido %}  
+  
+{% if alumnos %}
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>ID Comisión</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alumno in alumnos %}
+            <tr>
+                <td>{{ alumno.nombre }}</td>
+                <td>{{ alumno.apellido }}</td>
+                <td>{{ alumno.camada }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-danger" role="alert">
+    No se encontraron alumnos con ese nombre, por favor, volvé atrás e intentá nuevamente
+</div>
+{% endif %}
+{% endblock %}

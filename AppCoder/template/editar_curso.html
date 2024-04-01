@@ -1,0 +1,20 @@
+{% extends "padre.html" %}
+
+{% load static %}
+
+{% block contenido %}
+
+<form action="{% url 'editar_curso' curso.id %}" method="POST">
+    {% csrf_token %} <!-- {% csrf_token %} para proteger los formularios contra ataques CSRF al incluir un token único en cada formulario generado. -->
+    <p>Nombre</p>
+    {{mi_formulario.nombre}} 
+
+    <p>Camada</p>
+    {{mi_formulario.camada}}
+
+    <button class="btn btn-dark btn-sm"> Enviar</button>
+
+</form>
+
+
+{% endblock %}
