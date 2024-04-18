@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+
 
 # Create your models here.
 #El modelo se comunica con la db y es como se va a estructurar la db 
@@ -37,3 +39,10 @@ class Alumnos(models.Model): #estoy creando una clase alumnos que esta heredando
 
     class Meta:
         db_table = "AppCoder_alumnos"  # Especifica el nombre de la tabla en la base de datos
+
+class Avatar(models.Model):
+    user = models.ForeignKey(User , on_delete=models.CASCADE)
+    imagen = models.ImageField(upload_to="avatares" , null=True , blank=True)
+
+    def __str__(self):
+        return f"User: {self.user}  -  Imagen: {self.imagen}"        

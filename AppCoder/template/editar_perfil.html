@@ -1,0 +1,22 @@
+{% extends "padre.html" %}
+{% load static %}
+
+{% block contenido %}
+    <h2>Editar Perfil {{ usuario }}</h2>
+
+    {% if success_message %}
+        <div class="alert alert-success" role="alert">
+            {{ success_message }}
+        </div>
+        <a href="{% url 'home' %}" class="btn btn-primary">Ir a la página de inicio</a>
+    {% endif %}
+
+    <form action="" method="POST">
+        {% csrf_token %}
+        <table>
+            {{ miFormulario.as_table }}
+        </table>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+{% endblock %}
+

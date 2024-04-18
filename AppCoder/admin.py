@@ -7,5 +7,7 @@ admin.site.register(Profesores) #para que en nuestro admin esté visible en el p
 
 admin.site.register(Alumnos) 
 
+admin.site.register(Avatar)
+
 
 # Register your models here.

@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
-from AppCoder.models import Curso
+from AppCoder.models import Curso, Avatar
 from django.http import HttpResponse
 from django.template import loader
-from AppCoder.forms import Curso_formulario
+from AppCoder.forms import Curso_formulario, UserEditForm
 from django.http import Http404
 from AppCoder.forms import Profesores_formulario  
 from AppCoder.models import Profesores 
@@ -11,6 +11,13 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from AppCoder.models import Alumnos
 from AppCoder.forms import Alumnos_formulario 
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm  #importamos de django traemos las clases para crear un nuevo usuario y para autenticarlo
+from django.contrib.auth import login, authenticate, logout
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LogoutView
+from .models import Avatar
+
 
 
 
@@ -30,30 +37,21 @@ def inicio(request):
 #el request  es el pedido, el render es el response o sea la respuesta
 
 def ver_curso(request):
-    curso = Curso.objects.all()
-    print(curso)  # Verifica si se están recuperando los cursos correctamente
-    dicc = {'curso': curso}
-    plantilla = loader.get_template("cursos.html")
-    print(dicc)  # Verifica si los datos se están pasando correctamente a la plantilla
-    documento = plantilla.render(dicc)
-    return HttpResponse(documento)
-
-def ver_curso(request):
-    try:
-        curso = Curso.objects.all()
-        dicc = {'curso': curso}
+        cursos = Curso.objects.all()
+        print(cursos)  # Verifica si se están recuperando los cursos correctamente
+        dicc = {'cursos': cursos}
         plantilla = loader.get_template("cursos.html")
+        print(dicc)  # Verifica si los datos se están pasando correctamente a la plantilla
         documento = plantilla.render(dicc)
         return HttpResponse(documento)
-    except Curso.DoesNotExist:
-        raise Http404("No existen cursos en la base de datos")  # Mensaje de error personalizado
-    except Exception as e:
-        print(f"Error en la vista ver_curso: {e}")  # Imprimir el error en la consola para depurar
-        raise Http404("Error en la vista ver_curso")  # Mensaje de error general
 
+        
 def alumnos(request):
-    return render(request , "alumnos.html")
+    avatares = Avatar.objects.filter(user=request.user.id)
+    
+    return render(request , "alumnos.html", {"url":avatares[0].imagen.url})
 
+@login_required
 def curso_formulario(request):
     if request.method == "POST":
         mi_formulario = Curso_formulario( request.POST )
@@ -79,14 +77,15 @@ def buscar(request):
         return render(request , "resultado_busqueda.html" , {"cursos": cursos})
     else:
         return HttpResponse("Ingrese el nombre del curso")    
-    
-def elimina_curso(request , id):
+
+@login_required
+def elimina_curso(request, id):
     curso = Curso.objects.get(id=id)
     curso.delete()
-    curso = Curso.objects.all()
-    return render(request , "cursos.html" , {"curso":curso})    
+    cursos = Curso.objects.all()
+    return render(request, "cursos.html", {"cursos": cursos}) 
 
-
+@login_required
 def editar(request , id):
     curso = Curso.objects.get(id=id)
     if request.method == "POST":
@@ -102,9 +101,9 @@ def editar(request , id):
 
             curso.save()
 
-            curso = Curso.objects.all()
+            cursos = Curso.objects.all()
 
-            return render(request , "cursos.html" , {"curso":curso})
+            return render(request , "cursos.html" , {"cursos":cursos})
     else:
         mi_formulario = Curso_formulario(initial={"nombre":curso.nombre , "camada":curso.camada}) #initial en un formulario se utiliza para especificar valores iniciales para los campos del formulario,  tiene nombre y camada
     return render( request , "editar_curso.html" , {"mi_formulario": mi_formulario , "curso":curso})
@@ -187,6 +186,7 @@ def ver_alumnos(request):
     documento = plantilla.render(dicc)
     return HttpResponse(documento)
 
+@login_required
 def alumnos_formulario(request):
     if request.method == "POST":
         alumnos = Alumnos_formulario(request.POST)
@@ -210,7 +210,8 @@ def buscaralumnos(request):
         return render(request, "resultado_busquedaalumnos.html", {"alumnos": alumnos})
     else:
         return HttpResponse("Ingrese el nombre del alumno")
-    
+
+@login_required    
 def eliminar_alumnos(request, id): 
     alumnos = Alumnos.objects.get(id=id)    
     alumnos.delete()
@@ -218,6 +219,7 @@ def eliminar_alumnos(request, id):
     alumnos = Alumnos.objects.all()
     return render(request , "alumnos.html" , {"alumnos":alumnos})    
 
+@login_required
 def editar_alumnos(request, id):
     alumnos = Alumnos.objects.get(id=id)
     if request.method == "POST":
@@ -238,3 +240,70 @@ def editar_alumnos(request, id):
         mi_formulario = Alumnos_formulario(initial={"nombre": alumnos.nombre, "apellido": alumnos.apellido, "camada": alumnos.camada})
     
     return render(request, "editar_alumnos.html", {"mi_formulario": mi_formulario, "alumnos": alumnos})
+
+
+
+def login_request(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            usuario = form.cleaned_data.get("username")
+            contra = form.cleaned_data.get("password")
+            user = authenticate(username=usuario, password=contra)
+            if user is not None:
+                login(request, user)
+                return redirect('home')  # Redirige al usuario a la página de inicio después del inicio de sesión exitoso
+            else:
+                return HttpResponse("Usuario no encontrado")
+        else:
+            return HttpResponse("Formato incorrecto")
+    form = AuthenticationForm()
+    return render(request, "login.html", {"form": form})
+
+def register(request):
+    
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return HttpResponse("Usuario creado")
+
+    else:
+        form = UserCreationForm()
+    return render(request , "registro.html" , {"form":form})
+
+
+
+
+def editarPerfil(request):
+    usuario = request.user
+    success_message = None
+
+    if request.method == "POST":
+        mi_formulario = UserEditForm(request.POST)
+        if mi_formulario.is_valid():
+            informacion = mi_formulario.cleaned_data
+            usuario.email = informacion["email"]
+            password = informacion["password1"]
+            usuario.set_password(password)
+            usuario.save()
+            success_message = "¡Perfil editado con éxito!"
+            # Agregamos un mensaje de éxito a través del sistema de mensajes de Django
+            # No redirigimos aquí, permitimos que la plantilla maneje la redirección
+        else:
+            # Si el formulario no es válido, volvemos a renderizar la página con el formulario y los errores
+            messages.error(request, "¡Hubo un error al editar el perfil! Por favor, corrige los errores.")
+    else:
+        mi_formulario = UserEditForm(initial={"email": usuario.email})
+    
+    return render(request, "editar_perfil.html", {"miFormulario": mi_formulario, "usuario": usuario, "success_message": success_message})
+
+def logout_view(request):
+    if request.method == 'POST':
+        logout(request)
+        messages.success(request, "Has cerrado sesión exitosamente.")
+        return redirect('home')  # Redirige al usuario a la página de inicio
+
+    # Si la solicitud no es POST, simplemente renderiza la plantilla de logout
+    return render(request, 'logout.html')    

@@ -27,8 +27,11 @@
                 <td>{{n.nombre}}</td>
                 <td>{{n.apellido}}</td>
                 <td>{{n.camada}}</td>
+
+                {% if user.is_authenticated %}
                 <td><a href="{% url 'eliminar_alumnos' n.id %}" class="btn btn-danger btn-sm">BORRAR</a></td>
                 <td><a href="{% url 'editar_alumnos' n.id %}" class="btn btn-warning btn-sm">EDITAR</a></td> 
+                {% endif %}
 
             </tr>
 

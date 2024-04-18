@@ -24,8 +24,21 @@
                 <a class="btn btn-primary" href="{% url 'cursos' %}">Cursos</a> <!-- si mandamos rutas absolutas el link redirige a un sitio externo, por otro lado con rutas no absolutas busca dentro de lo local  -->
                 <a class="btn btn-primary" href="{% url 'alumnos' %}">Alumnos</a>
                 <a class="btn btn-primary" href="{% url 'profesores' %}">Profesores</a>
-                <a class="btn btn-primary" href="">Ingresar</a>
-                <a class="btn btn-primary" href="">Registrate</a>
+                {% if not request.user.is_authenticated %}
+                <a class="btn btn-primary" href="{% url 'Login' %}">Ingresar</a>
+                {% endif %}
+
+        <!-- Formulario para logout -->
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Salir</button>
+        </form>
+
+        <!-- Mensaje de bienvenida y avatar -->
+        <img src="{{ url }}" alt="" width="100px" height="100px">
+        <p>Bienvenido, {{user.username}}</p>
+
+                <a class="btn btn-primary" href="{% url 'Register' %}">Registrate</a>
             </div>
         </nav>
         <!-- Masthead-->
