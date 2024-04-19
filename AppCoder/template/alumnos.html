@@ -8,7 +8,11 @@
 
 <main class="container">
     <h1 class="text-xl-center title"> Alumnos </h1>
+     <!-- Opción para crear alumno (solo visible para usuarios autenticados) -->
+     {% if user.is_authenticated %}    
     <a href="alta_alumnos" class="btn btn-info btn-sm">CREAR ALUMNO</a> 
+    {% endif %}
+
     <a href="buscar_alumnos.html" class="btn btn-secondary btn-sm mt-3 mb-3">BUSCAR ALUMNOS</a>
 
     <table class="table">

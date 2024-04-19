@@ -20,7 +20,7 @@ urlpatterns = [
     path("buscarprofesores", views.buscarprofesores),
     path("eliminar_profesores/<int:id>", views.eliminar_profesores, name="eliminar_profesores"),
     path("editar_profesores/<int:id>", views.editar_profesores, name="editar_profesores"),
-    path("ver_alumnos.html", views.ver_alumnos, name="alumnos"),
+    #path("ver_alumnos.html", views.ver_alumnos, name="alumnos"),
     path("alta_alumnos", views.alumnos_formulario),
     path("buscar_alumnos.html", views.buscar_alumnos),
     path("buscaralumnos", views.buscaralumnos),

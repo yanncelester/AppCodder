@@ -1,51 +1,22 @@
 from django.shortcuts import render, redirect
-from AppCoder.models import Curso, Avatar
+from AppCoder.models import Curso, Avatar, Profesores, Alumnos
 from django.http import HttpResponse
 from django.template import loader
-from AppCoder.forms import Curso_formulario, UserEditForm
-from django.http import Http404
-from AppCoder.forms import Profesores_formulario  
-from AppCoder.models import Profesores 
+from AppCoder.forms import Curso_formulario, UserEditForm, Profesores_formulario, Alumnos_formulario
 from django.contrib import messages
 from django.urls import reverse
-from django.http import HttpResponseRedirect
-from AppCoder.models import Alumnos
-from AppCoder.forms import Alumnos_formulario 
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm  #importamos de django traemos las clases para crear un nuevo usuario y para autenticarlo
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login, authenticate, logout
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LogoutView
-from .models import Avatar
 
-
-
-
-
-# Create your views here.
 
 def alta_curso(request, nombre):
-    curso = Curso(nombre = nombre, camada =234511)
+    curso = Curso(nombre=nombre, camada=234511)
     curso.save()
     texto = f"Se guardo en la DB el curso: {curso.nombre} {curso.camada}"
     return HttpResponse(texto)
 
-
 def inicio(request):
-    return render(request, "padre.html") #cuando llega la petición voy a retornar un render, es decir a mostrar resultados
-#render quiere decir mostrar, visualizar, cuando se genera el render se manda el resultado, generalmente porque pasan cosas como procesar datos, todo a nivel servisdor
-#el request  es el pedido, el render es el response o sea la respuesta
-
-
-def ver_curso(request):
-    cursos = Curso.objects.all()  # Cambia 'curso' a 'cursos'
-    return render(request, "cursos.html", {"cursos": cursos}) 
-
-
-
-        
-def alumnos(request):
-    alumnos = Alumnos.objects.all()
     avatar_url = None
     
     if request.user.is_authenticated:
@@ -53,47 +24,74 @@ def alumnos(request):
         if avatares.exists():
             avatar_url = avatares[0].imagen.url
 
+    return render(request, "padre.html", {"avatar_url": avatar_url})    
+
+
+def ver_curso(request):
+    cursos = Curso.objects.all()
+    avatar_url = None
+    
+    if request.user.is_authenticated:
+        avatares = Avatar.objects.filter(user=request.user)
+        if avatares.exists():
+            avatar_url = avatares[0].imagen.url
+
+    return render(request, "cursos.html", {"cursos": cursos, "avatar_url": avatar_url})
+
+
+
+def alumnos(request):
+    alumnos = Alumnos.objects.all()
+    avatar_url = None
+
+    if request.user.is_authenticated:
+        avatares = Avatar.objects.filter(user=request.user)
+        if avatares.exists():
+            avatar_url = avatares[0].imagen.url
+
     return render(request, "alumnos.html", {"alumnos": alumnos, "avatar_url": avatar_url})
+
 
 @login_required
 def curso_formulario(request):
     if request.method == "POST":
-        mi_formulario = Curso_formulario( request.POST )
+        mi_formulario = Curso_formulario(request.POST)
         if mi_formulario.is_valid():
             datos = mi_formulario.cleaned_data
-            curso = Curso( nombre=datos["nombre"] , camada=datos["camada"])
+            curso = Curso(nombre=datos["nombre"], camada=datos["camada"])
             curso.save()
             return redirect('ver_curso')  # Redirige a la página donde se muestran todos los cursos
 
     return render(request, "formulario.html")
 
 
-def buscar_curso(request): 
-
+def buscar_curso(request):
     return render(request, "buscar_curso.html")
 
 
-def buscar(request): 
+def buscar(request):
 
-    if request.GET["nombre"]:
+    if request.GET.get("nombre"):
         nombre = request.GET["nombre"]
-        cursos = Curso.objects.filter(nombre__icontains= nombre) #sólo quiero que contengan los que contienen lo que ingrese en el form de búsqueda
-        return render(request , "resultado_busqueda.html" , {"cursos": cursos})
+        cursos = Curso.objects.filter(nombre__icontains=nombre)
+        return render(request, "resultado_busqueda.html", {"cursos": cursos})
     else:
-        return HttpResponse("Ingrese el nombre del curso")    
+        return HttpResponse("Ingrese el nombre del curso")
+
 
 @login_required
 def elimina_curso(request, id):
     curso = Curso.objects.get(id=id)
     curso.delete()
     cursos = Curso.objects.all()
-    return render(request, "cursos.html", {"cursos": cursos}) 
+    return render(request, "cursos.html", {"cursos": cursos})
+
 
 @login_required
-def editar(request , id):
+def editar(request, id):
     curso = Curso.objects.get(id=id)
     if request.method == "POST":
-        mi_formulario = Curso_formulario( request.POST )
+        mi_formulario = Curso_formulario(request.POST)
 
         if mi_formulario.is_valid():
 
@@ -107,63 +105,79 @@ def editar(request , id):
 
             cursos = Curso.objects.all()
 
-            return render(request , "cursos.html" , {"cursos":cursos})
+            return render(request, "cursos.html", {"cursos": cursos})
     else:
-        mi_formulario = Curso_formulario(initial={"nombre":curso.nombre , "camada":curso.camada}) #initial en un formulario se utiliza para especificar valores iniciales para los campos del formulario,  tiene nombre y camada
-    return render( request , "editar_curso.html" , {"mi_formulario": mi_formulario , "curso":curso})
+        mi_formulario = Curso_formulario(initial={"nombre": curso.nombre, "camada": curso.camada})
+    return render(request, "editar_curso.html", {"mi_formulario": mi_formulario, "curso": curso})
 
+"""
 def profesores(request):
 
     profes = Profesores.objects.all()
 
-    return render(request , "profesores.html", {"profesores": profes})
+    return render(request, "profesores.html", {"profesores": profes})
+    """
+
+def profesores(request):
+    profesores = Profesores.objects.all()
+    avatar_url = None
+    
+    if request.user.is_authenticated:
+        avatares = Avatar.objects.filter(user=request.user)
+        if avatares.exists():
+            avatar_url = avatares[0].imagen.url
+
+    return render(request, "profesores.html", {"profesores": profesores, "avatar_url": avatar_url})    
+
 
 def ver_profesores(request):
     profesores = Profesores.objects.all()
-    print(profesores)  # Verifica si se están recuperando los cursos correctamente
     dicc = {'profesores': profesores}
     plantilla = loader.get_template("profesores.html")
-    print(dicc)  # Verifica si los datos se están pasando correctamente a la plantilla
     documento = plantilla.render(dicc)
     return HttpResponse(documento)
+
 
 def profesores_formulario(request):
     if request.method == "POST":
         profesores = Profesores_formulario(request.POST)
-        if profesores.is_valid(): #Revisa que los datos vengan como los setee en forms.py
-            datos = profesores.cleaned_data #Es un diccionario con los datos limpios y correcto 
+        if profesores.is_valid():
+            datos = profesores.cleaned_data
             profesores = Profesores(nombre=datos["nombre"], apellido=datos["apellido"], id_comision=datos["id_comision"])
             profesores.save()
             return redirect('ver_profesores.html')  # Redirige a la página deseada después de guardar los datos
     else:
         formulario = Profesores_formulario()
         return render(request, "profesores_formulario.html", {'formulario': formulario})
-    
-def buscar_profesores(request): 
-
-    return render(request, "buscar_profesores.html")    
 
 
-def buscarprofesores(request): 
+def buscar_profesores(request):
 
-    if request.GET["nombre"]:
+    return render(request, "buscar_profesores.html")
+
+
+def buscarprofesores(request):
+
+    if request.GET.get("nombre"):
         nombre = request.GET["nombre"]
-        profesores = Profesores.objects.filter(nombre__icontains= nombre) #sólo quiero que contengan los que contienen lo que ingrese en el form de búsqueda
-        return render(request , "resultado_busquedaprofesores.html" , {"profesores": profesores})
+        profesores = Profesores.objects.filter(nombre__icontains=nombre)
+        return render(request, "resultado_busquedaprofesores.html", {"profesores": profesores})
     else:
-        return HttpResponse("Ingrese el nombre del profesor") 
-    
-def eliminar_profesores(request, id): 
-    profesores = Profesores.objects.get(id=id)    
+        return HttpResponse("Ingrese el nombre del profesor")
+
+
+def eliminar_profesores(request, id):
+    profesores = Profesores.objects.get(id=id)
     profesores.delete()
 
     profesores = Profesores.objects.all()
-    return render(request , "profesores.html" , {"profesores":profesores})    
+    return render(request, "profesores.html", {"profesores": profesores})
 
-def editar_profesores(request , id):
+
+def editar_profesores(request, id):
     profesores = Profesores.objects.get(id=id)
     if request.method == "POST":
-        mi_formulario = Profesores_formulario( request.POST )
+        mi_formulario = Profesores_formulario(request.POST)
 
         if mi_formulario.is_valid():
 
@@ -179,21 +193,13 @@ def editar_profesores(request , id):
 
             profesores = Profesores.objects.all()
 
-            return render(request , "profesores.html" , {"profesores":profesores})
+            return render(request, "profesores.html", {"profesores": profesores})
     else:
-        mi_formulario = Profesores_formulario(initial={"nombre":profesores.nombre , "apellido":profesores.apellido , "id_comision":profesores.id_comision}) 
-    return render( request , "editar_profesores.html" , {"mi_formulario": mi_formulario , "profesores":profesores})
+        mi_formulario = Profesores_formulario(
+            initial={"nombre": profesores.nombre, "apellido": profesores.apellido, "id_comision": profesores.id_comision})
+    return render(request, "editar_profesores.html", {"mi_formulario": mi_formulario, "profesores": profesores})
 
-def ver_alumnos(request):
-    alumnos = Alumnos.objects.all()
-    print(alumnos)  # Verifica si se están recuperando los cursos correctamente
-    dicc = {'alumnos': alumnos}
-    plantilla = loader.get_template("alumnos.html")
-    print(dicc)  # Verifica si los datos se están pasando correctamente a la plantilla
-    documento = plantilla.render(dicc)
-    return HttpResponse(documento)
 
-@login_required
 def alumnos_formulario(request):
     if request.method == "POST":
         alumnos = Alumnos_formulario(request.POST)
@@ -205,26 +211,30 @@ def alumnos_formulario(request):
     else:
         formulario = Alumnos_formulario()
         return render(request, "alumnos_formulario.html", {'formulario': formulario})
-    
-def buscar_alumnos(request): 
 
-    return render(request, "buscar_alumnos.html")      
-    
-def buscaralumnos(request): 
-    if "nombre" in request.GET:
+
+def buscar_alumnos(request):
+
+    return render(request, "buscar_alumnos.html")
+
+
+def buscaralumnos(request):
+    if request.GET.get("nombre"):
         nombre = request.GET["nombre"]
         alumnos = Alumnos.objects.filter(nombre__icontains=nombre)
         return render(request, "resultado_busquedaalumnos.html", {"alumnos": alumnos})
     else:
         return HttpResponse("Ingrese el nombre del alumno")
 
-@login_required    
-def eliminar_alumnos(request, id): 
-    alumnos = Alumnos.objects.get(id=id)    
+
+@login_required
+def eliminar_alumnos(request, id):
+    alumnos = Alumnos.objects.get(id=id)
     alumnos.delete()
 
     alumnos = Alumnos.objects.all()
-    return render(request , "alumnos.html" , {"alumnos":alumnos})    
+    return render(request, "alumnos.html", {"alumnos": alumnos})
+
 
 @login_required
 def editar_alumnos(request, id):
@@ -245,9 +255,8 @@ def editar_alumnos(request, id):
             return render(request, "alumnos.html", {"alumnos": alumnos})
     else:
         mi_formulario = Alumnos_formulario(initial={"nombre": alumnos.nombre, "apellido": alumnos.apellido, "camada": alumnos.camada})
-    
-    return render(request, "editar_alumnos.html", {"mi_formulario": mi_formulario, "alumnos": alumnos})
 
+    return render(request, "editar_alumnos.html", {"mi_formulario": mi_formulario, "alumnos": alumnos})
 
 
 def login_request(request):
@@ -267,8 +276,9 @@ def login_request(request):
     form = AuthenticationForm()
     return render(request, "login.html", {"form": form})
 
+
 def register(request):
-    
+
     if request.method == "POST":
         form = UserCreationForm(request.POST)
 
@@ -278,9 +288,7 @@ def register(request):
 
     else:
         form = UserCreationForm()
-    return render(request , "registro.html" , {"form":form})
-
-
+    return render(request, "registro.html", {"form": form})
 
 
 def editarPerfil(request):
@@ -296,21 +304,18 @@ def editarPerfil(request):
             usuario.set_password(password)
             usuario.save()
             success_message = "¡Perfil editado con éxito!"
-            # Agregamos un mensaje de éxito a través del sistema de mensajes de Django
-            # No redirigimos aquí, permitimos que la plantilla maneje la redirección
         else:
-            # Si el formulario no es válido, volvemos a renderizar la página con el formulario y los errores
             messages.error(request, "¡Hubo un error al editar el perfil! Por favor, corrige los errores.")
     else:
         mi_formulario = UserEditForm(initial={"email": usuario.email})
-    
+
     return render(request, "editar_perfil.html", {"miFormulario": mi_formulario, "usuario": usuario, "success_message": success_message})
+
 
 def logout_view(request):
     if request.method == 'POST':
         logout(request)
         messages.success(request, "Has cerrado sesión exitosamente.")
-        return redirect('home')  # Redirige al usuario a la página de inicio
+        return redirect('home')
 
-    # Si la solicitud no es POST, simplemente renderiza la plantilla de logout
-    return render(request, 'logout.html')    
+    return render(request, 'logout.html')
