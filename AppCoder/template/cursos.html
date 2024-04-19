@@ -2,45 +2,44 @@
 {% load static %}
 
 {% block contenido %}
-<main class="container">
-    <h1 class="text-xl-center title"> Cursos </h1>
-    
-    <!-- Opción para crear curso (solo visible para usuarios autenticados) -->
-    {% if user.is_authenticated %}
-        <a href="{% url 'alta_curso' %}" class="btn btn-info btn-sm btn-sm mt-3 mb-3">CREAR CURSO</a>
-    {% endif %}
-    
-    <a href="{% url 'buscar_curso' %}" class="btn btn-secondary btn-sm mt-3 mb-3">BUSCAR CURSO</a>
-    
-    <table class="table">
-        <thead>
-            <tr>
-                <th>id</th>
-                <th>nombre</th>
-                <th>camada</th>
-                {% if user.is_authenticated %}
-                    <th>Acciones</th>
-                {% endif %}
-            </tr>            
-        </thead>
-        <tbody>
-            {% for n in cursos %}
-            <tr>
-                <td>{{n.id}}</td>
-                <td>{{n.nombre}}</td>
-                <td>{{n.camada}}</td>
-                
-                <!-- Opción para eliminar curso (solo visible para usuarios autenticados) -->
-                {% if user.is_authenticated %}
-                    <td>
-                        <a href="{% url 'elimina_curso' n.id %}" class="btn btn-danger btn-sm">BORRAR</a>
-                        <a href="{% url 'editar_curso' n.id %}" class="btn btn-primary btn-sm">EDITAR</a>
-                    </td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</main>
+    <main class="container">
+        <h1 class="text-xl-center title">Cursos</h1>
+        
+        <!-- Opción para crear curso (solo visible para usuarios autenticados) -->
+        {% if user.is_authenticated %}
+            <a href="{% url 'alta_curso' %}" class="btn btn-info btn-sm btn-sm mt-3 mb-3">CREAR CURSO</a>
+        {% endif %}
+        
+        <a href="{% url 'buscar_curso' %}" class="btn btn-secondary btn-sm mt-3 mb-3">BUSCAR CURSO</a>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>nombre</th>
+                    <th>camada</th>
+                    {% if user.is_authenticated %}
+                        <th>Acciones</th>
+                    {% endif %}
+                </tr>            
+            </thead>
+            <tbody>
+                {% for n in cursos %}
+                    <tr>
+                        <td>{{n.id}}</td>
+                        <td>{{n.nombre}}</td>
+                        <td>{{n.camada}}</td>
 
+                        <!-- Opción para eliminar curso (solo visible para usuarios autenticados) -->
+                        {% if user.is_authenticated %}
+                            <td>
+                                <a href="{% url 'elimina_curso' n.id %}" class="btn btn-danger btn-sm">BORRAR</a>
+                                <a href="{% url 'editar_curso' n.id %}" class="btn btn-primary btn-sm">EDITAR</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
 {% endblock %}

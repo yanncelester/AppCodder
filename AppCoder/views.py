@@ -36,20 +36,24 @@ def inicio(request):
 #render quiere decir mostrar, visualizar, cuando se genera el render se manda el resultado, generalmente porque pasan cosas como procesar datos, todo a nivel servisdor
 #el request  es el pedido, el render es el response o sea la respuesta
 
+
 def ver_curso(request):
-        cursos = Curso.objects.all()
-        print(cursos)  # Verifica si se están recuperando los cursos correctamente
-        dicc = {'cursos': cursos}
-        plantilla = loader.get_template("cursos.html")
-        print(dicc)  # Verifica si los datos se están pasando correctamente a la plantilla
-        documento = plantilla.render(dicc)
-        return HttpResponse(documento)
+    cursos = Curso.objects.all()  # Cambia 'curso' a 'cursos'
+    return render(request, "cursos.html", {"cursos": cursos}) 
+
+
 
         
 def alumnos(request):
-    avatares = Avatar.objects.filter(user=request.user.id)
+    alumnos = Alumnos.objects.all()
+    avatar_url = None
     
-    return render(request , "alumnos.html", {"url":avatares[0].imagen.url})
+    if request.user.is_authenticated:
+        avatares = Avatar.objects.filter(user=request.user)
+        if avatares.exists():
+            avatar_url = avatares[0].imagen.url
+
+    return render(request, "alumnos.html", {"alumnos": alumnos, "avatar_url": avatar_url})
 
 @login_required
 def curso_formulario(request):
@@ -59,9 +63,9 @@ def curso_formulario(request):
             datos = mi_formulario.cleaned_data
             curso = Curso( nombre=datos["nombre"] , camada=datos["camada"])
             curso.save()
-            return render(request , "formulario.html")
+            return redirect('ver_curso')  # Redirige a la página donde se muestran todos los cursos
 
-    return render(request , "formulario.html")
+    return render(request, "formulario.html")
 
 
 def buscar_curso(request): 
@@ -109,7 +113,10 @@ def editar(request , id):
     return render( request , "editar_curso.html" , {"mi_formulario": mi_formulario , "curso":curso})
 
 def profesores(request):
-    return render(request , "profesores.html")
+
+    profes = Profesores.objects.all()
+
+    return render(request , "profesores.html", {"profesores": profes})
 
 def ver_profesores(request):
     profesores = Profesores.objects.all()

@@ -2,13 +2,17 @@
 
 {% load static %}
 
-
 {% block contenido %}
-
     <main class="container">
         <h1 class="text-xl-center title"> Profesores </h1>
-        <a href="alta_profesores" class="btn btn-info btn-sm mt-3 mb-3">AGREGAR PROFESOR</a>
+        
+        <!-- Opción para dar de alto profesores (solo visible para usuarios autenticados) -->
+        {% if user.is_authenticated %}
+            <a href="alta_profesores" class="btn btn-info btn-sm mt-3 mb-3">AGREGAR PROFESOR</a>
+        {% endif %}
+        
         <a href="buscar_profesores.html" class="btn btn-secondary btn-sm mt-3 mb-3">BUSCAR PROFESOR</a>
+        
         <table class="table">
             <thead>
                 <tr>
@@ -20,26 +24,20 @@
             </thead>
             <tbody>
                 {% for n in profesores %}
-                <tr>
-                    <td>{{n.id}}</td>
-                    <td>{{n.nombre}}</td>
-                    <td>{{n.apellido}}</td>
-                    <td>{{n.id_comision}}</td>
-                    <td><a href="{% url 'eliminar_profesores' n.id %}" class="btn btn-danger btn-sm">BORRAR</a></td>
-                    <td><a href="{% url 'editar_profesores' n.id %}" class="btn btn-warning btn-sm">EDITAR</a></td>
-                 </tr>
+                    <tr>
+                        <td>{{n.id}}</td>
+                        <td>{{n.nombre}}</td>
+                        <td>{{n.apellido}}</td>
+                        <td>{{n.id_comision}}</td>
 
+                        <!-- Opción para eliminar o editar (solo visible para usuarios autenticados) -->
+                        {% if user.is_authenticated %}
+                            <td><a href="{% url 'eliminar_profesores' n.id %}" class="btn btn-danger btn-sm">BORRAR</a></td>
+                            <td><a href="{% url 'editar_profesores' n.id %}" class="btn btn-warning btn-sm">EDITAR</a></td>
+                        {% endif %}
+                    </tr>
                 {% endfor %}
-                
             </tbody>
-
-
         </table>
-
-
-
     </main>
-    
-
 {% endblock %}
-

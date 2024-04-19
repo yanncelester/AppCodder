@@ -7,8 +7,8 @@ from django.contrib.auth.views import LogoutView
 urlpatterns = [
     path("ver_curso", views.ver_curso, name="cursos"),  # Solo debe haber una entrada para ver_curso
     path("", views.inicio, name="home"),
-    path("alumnos", views.alumnos, name="alumnos"),
-    path("alta_curso", views.curso_formulario),
+    path("alumnos", views.alumnos , name="alumnos"),
+    path("alta_curso", views.curso_formulario, name="alta_curso"),
     path("buscar_curso", views.buscar_curso, name="buscar_curso"),
     path("buscar", views.buscar),
     path("elimina_curso/<int:id>", views.elimina_curso, name="elimina_curso"),
